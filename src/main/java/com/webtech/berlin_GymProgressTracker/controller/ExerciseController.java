@@ -6,11 +6,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {
+        "http://localhost:5173",
+        "https://meinwebtechprojektfront.onrender.com"  // Render-Frontend-URL
+})
+
 @RestController
 public class ExerciseController {
 
-    @GetMapping("/exercises")
+    @GetMapping("/")
     public List<Exercise> getExercises() {
         return List.of(
                 new Exercise("Bankdrücken", 80, 10),
