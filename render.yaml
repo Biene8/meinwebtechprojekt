@@ -1,7 +1,7 @@
 services:
   - type: web
     name: gym-tracker-backend
+    branch: main
     buildCommand: "./gradlew build"
     startCommand: "java -jar build/libs/*.jar"
-    branch: main
-    region: frankfurt
+    envVars: []
