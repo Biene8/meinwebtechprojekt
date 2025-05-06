@@ -8,7 +8,7 @@
         <option name="gradleJvm" value="21" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/../../../../../UniFächer/3.Semester/Webtechno/Projekt/meinwebtechprojekt" />
+            <option value="$PROJECT_DIR$" />
           </set>
         </option>
       </GradleProjectSettings>
