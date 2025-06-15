@@ -1,25 +1,30 @@
 package com.webtech.berlin_GymProgressTracker.controller;
 
 import com.webtech.berlin_GymProgressTracker.model.Exercise;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import com.webtech.berlin_GymProgressTracker.repository.ExerciseRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 @CrossOrigin(origins = {
         "http://localhost:5173",
-        "https://meinwebtechprojektfront.onrender.com"  // Render-Frontend-URL
+        "https://meinwebtechprojektfront.onrender.com"
 })
-
 @RestController
+@RequestMapping("/exercises")
 public class ExerciseController {
 
-    @GetMapping("/")
+    @Autowired
+    private ExerciseRepository exerciseRepository;
+
+    @GetMapping
     public List<Exercise> getExercises() {
-        return List.of(
-                new Exercise("Bankdrücken", 80, 10),
-                new Exercise("Kniebeuge", 100, 8),
-                new Exercise("Kreuzheben", 120, 6)
-        );
+        return exerciseRepository.findAll();
+    }
+
+    @PostMapping
+    public Exercise createExercise(@RequestBody Exercise exercise) {
+        return exerciseRepository.save(exercise);
     }
 }
