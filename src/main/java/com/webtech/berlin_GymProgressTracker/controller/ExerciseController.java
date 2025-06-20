@@ -14,11 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @CrossOrigin(origins = {
-        "http://localhost:3000",    // React default
-        "http://localhost:5173",    // Vite default
-        "http://localhost:8080",    // Alternative port
-        "http://localhost:8081",    // Euer aktueller Port!
-        "http://localhost:8082",    // Weitere Alternative
+        "http://localhost:8081",
         "https://meinwebtechprojektfront.onrender.com"
 })
 @RestController

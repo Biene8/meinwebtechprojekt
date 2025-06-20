@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module version="4">
+  <component name="OpenBpmProjectModulesStateV2">
+    <option name="hasState" value="true" />
+    <option name="moduleState">
+      <JmixModuleStateV2>
+        <option name="artifactGroup" value="com.webtech" />
+        <option name="artifactName" value="berlin-GymProgressTracker" />
+        <option name="artifactVersion" value="0.0.1-SNAPSHOT" />
+        <option name="buildFilePath" value="$MODULE_DIR$/../../build.gradle" />
+        <option name="buildScriptDependencies">
+          <Dependency configuration="classpath" group="org.springframework.boot" name="org.springframework.boot.gradle.plugin" version="3.4.4" />
+          <Dependency configuration="classpath" group="io.spring.dependency-management" name="io.spring.dependency-management.gradle.plugin" version="1.1.7" />
+        </option>
+        <option name="buildSystemName" value="Gradle" />
+        <option name="classesDir" value="$MODULE_DIR$/../../build/classes/java/main" />
+        <option name="dependencies">
+          <Dependency configuration="implementation" group="org.springframework.boot" name="spring-boot-starter-web" />
+          <Dependency configuration="implementation" group="org.springframework.boot" name="spring-boot-starter-data-jpa" />
+          <Dependency configuration="implementation" group="org.springframework.boot" name="spring-boot-starter-validation" />
+          <Dependency configuration="runtimeOnly" group="com.h2database" name="h2" />
+          <Dependency configuration="runtimeOnly" group="org.postgresql" name="postgresql" />
+          <Dependency configuration="testImplementation" group="org.springframework.boot" name="spring-boot-starter-test" />
+          <Dependency configuration="testRuntimeOnly" group="org.junit.platform" name="junit-platform-launcher" />
+        </option>
+        <option name="jarFile" value="$MODULE_DIR$/../../build/libs/berlin-GymProgressTracker-0.0.1-SNAPSHOT-plain.jar" />
+        <option name="mavenLocalURI" value="file:$MAVEN_REPOSITORY$/" />
+        <option name="moduleName" value="berlin-GymProgressTracker" />
+        <option name="rootBuildFilePath" value="$MODULE_DIR$/../../build.gradle" />
+        <option name="rootProjectName" value="berlin-GymProgressTracker" />
+        <option name="stateBuildScriptRepositories">
+          <Repository url="https://plugins.gradle.org/m2" />
+        </option>
+        <option name="stateRepositories">
+          <Repository url="https://repo.maven.apache.org/maven2/" />
+        </option>
+      </JmixModuleStateV2>
+    </option>
+  </component>
+</module>
