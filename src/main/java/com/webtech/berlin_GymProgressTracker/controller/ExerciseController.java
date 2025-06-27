@@ -15,7 +15,7 @@ import java.util.Map;
 
 @CrossOrigin(origins = {
         "http://localhost:8081",
-        "https://meinwebtechprojektfront.onrender.com"
+        "https://meinwebtechprojekt-5pjt.onrender.com"
 })
 @RestController
 @RequestMapping("/exercises")
