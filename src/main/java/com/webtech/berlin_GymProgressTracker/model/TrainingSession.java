@@ -23,12 +23,12 @@ public class TrainingSession {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
-    @OneToMany(mappedBy = "trainingSession", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // Definiert die One-to-Many-Beziehung
+    @OneToMany(mappedBy = "trainingSession", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Exercise> exercises = new ArrayList<>();
 
     public TrainingSession() {
-        this.startTime = LocalDateTime.now(); // Setzt die Startzeit automatisch bei Erstellung
+        this.startTime = LocalDateTime.now();
     }
 
     public Long getId() {

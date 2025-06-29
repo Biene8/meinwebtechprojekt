@@ -30,13 +30,11 @@ public class ExerciseController {
     @Autowired
     private SetRepository setRepository;
 
-    // Alle Übungen abrufen
     @GetMapping
     public List<Exercise> getExercises() {
         return exerciseRepository.findAll();
     }
 
-    // Spezifische Übung abrufen
     @GetMapping("/{id}")
     public ResponseEntity<Exercise> getExercise(@PathVariable Long id) {
         return exerciseRepository.findById(id)
@@ -44,7 +42,6 @@ public class ExerciseController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Übung aktualisieren
     @PutMapping("/{id}")
     public ResponseEntity<?> updateExercise(@PathVariable Long id, @Valid @RequestBody Exercise exerciseDetails, BindingResult result) {
         // Validierungsfehler prüfen
@@ -73,7 +70,6 @@ public class ExerciseController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    // Übung löschen
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteExercise(@PathVariable Long id) {
         return exerciseRepository.findById(id).map(exercise -> {
@@ -91,7 +87,6 @@ public class ExerciseController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    // Satz zu einer Übung hinzufügen
     @PostMapping("/{exerciseId}/sets")
     public ResponseEntity<?> addSetToExercise(@PathVariable Long exerciseId, @Valid @RequestBody Set set, BindingResult result) {
         // Validierungsfehler prüfen
@@ -108,16 +103,12 @@ public class ExerciseController {
 
         return exerciseRepository.findById(exerciseId).map(exercise -> {
             try {
-                // Set der Exercise zuweisen
                 set.setExercise(exercise);
 
-                // Set zur Exercise hinzufügen
                 exercise.addSet(set);
 
-                // Exercise speichern (cascadiert zu Set)
                 Exercise savedExercise = exerciseRepository.save(exercise);
 
-                // Das gespeicherte Set zurückgeben
                 Set savedSet = savedExercise.getSets().stream()
                         .filter(s -> s.getWeight().equals(set.getWeight()) && s.getReps().equals(set.getReps()))
                         .reduce((first, second) -> second) // Nimmt das zuletzt hinzugefügte

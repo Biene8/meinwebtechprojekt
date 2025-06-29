@@ -25,13 +25,11 @@ public class SetController {
     @Autowired
     private SetRepository setRepository;
 
-    // Alle Sätze abrufen
     @GetMapping
     public List<Set> getAllSets() {
         return setRepository.findAll();
     }
 
-    // Spezifischen Satz abrufen
     @GetMapping("/{id}")
     public ResponseEntity<Set> getSet(@PathVariable Long id) {
         return setRepository.findById(id)
@@ -39,7 +37,6 @@ public class SetController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Satz aktualisieren
     @PutMapping("/{id}")
     public ResponseEntity<?> updateSet(@PathVariable Long id, @Valid @RequestBody Set setDetails, BindingResult result) {
         // Validierungsfehler prüfen
@@ -56,7 +53,6 @@ public class SetController {
 
         return setRepository.findById(id).map(set -> {
             try {
-                // Nur Gewicht und Wiederholungen aktualisieren
                 set.setWeight(setDetails.getWeight());
                 set.setReps(setDetails.getReps());
 
@@ -71,12 +67,10 @@ public class SetController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    // Satz löschen
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteSet(@PathVariable Long id) {
         return setRepository.findById(id).map(set -> {
             try {
-                // Set aus der Exercise entfernen (bidirektionale Beziehung)
                 if (set.getExercise() != null) {
                     set.getExercise().removeSet(set);
                 }

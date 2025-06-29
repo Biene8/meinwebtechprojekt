@@ -25,7 +25,6 @@ public class Exercise {
     @NotBlank(message = "Name darf nicht leer sein")
     private String name;
 
-    // Gewicht und Wiederholungen wurden in die Set-Entität verschoben
     
     @ManyToOne
     @JoinColumn(name = "training_session_id", nullable = false)
@@ -36,16 +35,13 @@ public class Exercise {
     @JsonManagedReference
     private List<Set> sets = new ArrayList<>();
 
-    // Standard-Konstruktor für JPA
     public Exercise() {}
 
-    // Konstruktor für neue Übungen (Sets werden später hinzugefügt)
     public Exercise(String name, TrainingSession trainingSession) {
         this.name = name;
         this.trainingSession = trainingSession;
     }
 
-    // Getter und Setter
     public Long getId() {
         return id;
     }
@@ -78,13 +74,11 @@ public class Exercise {
         this.sets = sets;
     }
 
-    // Hilfsmethode zum Hinzufügen eines Sets
     public void addSet(Set set) {
         sets.add(set);
         set.setExercise(this);
     }
 
-    // Hilfsmethode zum Entfernen eines Sets
     public void removeSet(Set set) {
         sets.remove(set);
         set.setExercise(null);

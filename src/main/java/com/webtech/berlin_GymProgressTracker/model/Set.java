@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Positive;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
-@jakarta.persistence.Table(name = "exercise_set") // Vermeidet Konflikte mit SQL-Keyword 'SET'
+@jakarta.persistence.Table(name = "exercise_set")
 public class Set {
 
     @Id
@@ -31,17 +31,14 @@ public class Set {
     @JsonBackReference
     private Exercise exercise;
 
-    // Standard-Konstruktor für JPA
     public Set() {}
 
-    // Konstruktor für neue Sets
     public Set(Integer weight, Integer reps, Exercise exercise) {
         this.weight = weight;
         this.reps = reps;
         this.exercise = exercise;
     }
 
-    // Getter und Setter
     public Long getId() {
         return id;
     }
