@@ -1,25 +1,23 @@
 package com.webtech.berlin_GymProgressTracker.controller;
 
-import com.webtech.berlin_GymProgressTracker.model.TrainingSession;
 import com.webtech.berlin_GymProgressTracker.model.Exercise;
 import com.webtech.berlin_GymProgressTracker.model.Set;
+import com.webtech.berlin_GymProgressTracker.model.TrainingSession;
 import com.webtech.berlin_GymProgressTracker.repository.TrainingSessionRepository;
-import com.webtech.berlin_GymProgressTracker.repository.ExerciseRepository;
-import com.webtech.berlin_GymProgressTracker.repository.SetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 import jakarta.validation.Valid;
-import org.springframework.validation.BindingResult;
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @CrossOrigin(origins = {
+        "http://localhost:8080",
         "http://localhost:8081",
         "https://meinwebtechprojektfront-uxql.onrender.com"
 })
@@ -30,55 +28,33 @@ public class TrainingSessionController {
     @Autowired
     private TrainingSessionRepository trainingSessionRepository;
 
-    @Autowired
-    private ExerciseRepository exerciseRepository;
+    // Alle Trainingseinheiten abrufen
+    @GetMapping
+    public List<TrainingSession> getAllTrainingSessions() {
+        return trainingSessionRepository.findAll();
+    }
 
-    @Autowired
-    private SetRepository setRepository;
+    // Spezifische Trainingseinheit abrufen
+    @GetMapping("/{id}")
+    public ResponseEntity<TrainingSession> getTrainingSession(@PathVariable Long id) {
+        return trainingSessionRepository.findById(id)
+                .map(session -> ResponseEntity.ok().body(session))
+                .orElse(ResponseEntity.notFound().build());
+    }
 
     // Neue Trainingseinheit starten
     @PostMapping
-    public ResponseEntity<TrainingSession> startNewTrainingSession() {
+    public ResponseEntity<TrainingSession> startTrainingSession() {
         TrainingSession session = new TrainingSession();
+        session.setStartTime(LocalDateTime.now());
         TrainingSession savedSession = trainingSessionRepository.save(session);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedSession);
     }
 
-    // Trainingseinheit beenden
-    @PutMapping("/{sessionId}/end")
-    public ResponseEntity<TrainingSession> endTrainingSession(@PathVariable Long sessionId) {
-        Optional<TrainingSession> optionalSession = trainingSessionRepository.findById(sessionId);
-        if (optionalSession.isPresent()) {
-            TrainingSession session = optionalSession.get();
-            session.setEndTime(LocalDateTime.now());
-            TrainingSession updatedSession = trainingSessionRepository.save(session);
-            return ResponseEntity.ok(updatedSession);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    // Alle Trainingseinheiten abrufen
-    @GetMapping
-    public ResponseEntity<List<TrainingSession>> getAllTrainingSessions() {
-        List<TrainingSession> sessions = trainingSessionRepository.findAll();
-        return ResponseEntity.ok(sessions);
-    }
-
-    // Spezifische Trainingseinheit abrufen
-    @GetMapping("/{sessionId}")
-    public ResponseEntity<TrainingSession> getTrainingSessionById(@PathVariable Long sessionId) {
-        Optional<TrainingSession> optionalSession = trainingSessionRepository.findById(sessionId);
-        if (optionalSession.isPresent()) {
-            return ResponseEntity.ok(optionalSession.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    // Übung zu Trainingseinheit hinzufügen (mit erstem Set)
+    // Übung zu einer Trainingseinheit hinzufügen
     @PostMapping("/{sessionId}/exercises")
-    public ResponseEntity<?> addExerciseToTrainingSession(@PathVariable Long sessionId, @Valid @RequestBody Map<String, Object> exerciseData, BindingResult result) {
+    public ResponseEntity<?> addExerciseToSession(@PathVariable Long sessionId, @Valid @RequestBody Exercise exercise, BindingResult result) {
+        // Validierungsfehler prüfen
         if (result.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             result.getFieldErrors().forEach(error ->
@@ -90,48 +66,75 @@ public class TrainingSessionController {
             ));
         }
 
-        Optional<TrainingSession> optionalSession = trainingSessionRepository.findById(sessionId);
-        if (optionalSession.isPresent()) {
-            TrainingSession session = optionalSession.get();
-            
+        return trainingSessionRepository.findById(sessionId).map(trainingSession -> {
             try {
-                // Übung erstellen
-                Exercise exercise = new Exercise();
-                exercise.setName((String) exerciseData.get("name"));
-                exercise.setTrainingSession(session);
-                Exercise savedExercise = exerciseRepository.save(exercise);
+                // Exercise der TrainingSession zuweisen
+                exercise.setTrainingSession(trainingSession);
 
-                // Ersten Set hinzufügen, falls Gewicht und Wiederholungen angegeben
-                if (exerciseData.containsKey("weight") && exerciseData.containsKey("reps")) {
-                    Set firstSet = new Set();
-                    firstSet.setWeight((Integer) exerciseData.get("weight"));
-                    firstSet.setReps((Integer) exerciseData.get("reps"));
-                    firstSet.setExercise(savedExercise);
-                    setRepository.save(firstSet);
+                // WICHTIG: Sets der Übung zuweisen und die bidirektionale Beziehung setzen
+                if (exercise.getSets() != null) {
+                    for (Set set : exercise.getSets()) {
+                        set.setExercise(exercise); // Set dem Exercise zuweisen
+                    }
                 }
+
+                // Exercise zur Session hinzufügen (setzt auch die bidirektionale Beziehung)
+                trainingSession.addExercise(exercise);
+
+                // Session speichern (cascadiert zu Exercise und Sets)
+                TrainingSession savedSession = trainingSessionRepository.save(trainingSession);
+
+                // Das gespeicherte Exercise aus der Session zurückgeben
+                Exercise savedExercise = savedSession.getExercises().stream()
+                        .filter(e -> e.getName().equals(exercise.getName()))
+                        .reduce((first, second) -> second) // Nimmt das zuletzt hinzugefügte
+                        .orElse(exercise);
 
                 return ResponseEntity.status(HttpStatus.CREATED).body(savedExercise);
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                        "message", "Fehler beim Speichern der Übung"
+                        "message", "Fehler beim Speichern der Übung",
+                        "error", e.getMessage()
                 ));
             }
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        }).orElse(ResponseEntity.notFound().build());
     }
 
-    // Trainingseinheit löschen (NEU)
-    @DeleteMapping("/{sessionId}")
-    public ResponseEntity<Void> deleteTrainingSession(@PathVariable Long sessionId) {
-        Optional<TrainingSession> optionalSession = trainingSessionRepository.findById(sessionId);
-        if (optionalSession.isPresent()) {
-            // Cascade-Löschung erfolgt automatisch durch JPA-Konfiguration
-            trainingSessionRepository.deleteById(sessionId);
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    // Trainingseinheit beenden
+    @PutMapping("/{id}/end")
+    public ResponseEntity<?> endTrainingSession(@PathVariable Long id) {
+        return trainingSessionRepository.findById(id).map(session -> {
+            try {
+                session.setEndTime(LocalDateTime.now());
+                TrainingSession savedSession = trainingSessionRepository.save(session);
+                return ResponseEntity.ok().body(Map.of(
+                        "message", "Training erfolgreich beendet",
+                        "session", savedSession
+                ));
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                        "message", "Fehler beim Beenden des Trainings",
+                        "error", e.getMessage()
+                ));
+            }
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    // Trainingseinheit löschen
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteTrainingSession(@PathVariable Long id) {
+        return trainingSessionRepository.findById(id).map(session -> {
+            try {
+                trainingSessionRepository.delete(session);
+                return ResponseEntity.ok().body(Map.of(
+                        "message", "Trainingseinheit erfolgreich gelöscht"
+                ));
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                        "message", "Fehler beim Löschen der Trainingseinheit",
+                        "error", e.getMessage()
+                ));
+            }
+        }).orElse(ResponseEntity.notFound().build());
     }
 }
-
