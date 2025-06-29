@@ -5,11 +5,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn; // Neu hinzugefügt
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.FetchType;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import com.fasterxml.jackson.annotation.JsonBackReference; // Neu hinzugefügt
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Exercise {
@@ -21,28 +25,27 @@ public class Exercise {
     @NotBlank(message = "Name darf nicht leer sein")
     private String name;
 
-    @NotNull(message = "Gewicht darf nicht leer sein")
-    @Positive(message = "Gewicht muss positiv sein")
-    private Integer weight;
-
-    @NotNull(message = "Wiederholungen dürfen nicht leer sein")
-    @Positive(message = "Wiederholungen müssen positiv sein")
-    private Integer reps;
-
+    // Gewicht und Wiederholungen wurden in die Set-Entität verschoben
+    
     @ManyToOne
     @JoinColumn(name = "training_session_id", nullable = false)
     @JsonBackReference
     private TrainingSession trainingSession;
 
+    @OneToMany(mappedBy = "exercise", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<Set> sets = new ArrayList<>();
+
+    // Standard-Konstruktor für JPA
     public Exercise() {}
 
-    public Exercise(String name, Integer weight, Integer reps, TrainingSession trainingSession) {
+    // Konstruktor für neue Übungen (Sets werden später hinzugefügt)
+    public Exercise(String name, TrainingSession trainingSession) {
         this.name = name;
-        this.weight = weight;
-        this.reps = reps;
         this.trainingSession = trainingSession;
     }
 
+    // Getter und Setter
     public Long getId() {
         return id;
     }
@@ -59,22 +62,6 @@ public class Exercise {
         this.name = name;
     }
 
-    public Integer getWeight() {
-        return weight;
-    }
-
-    public void setWeight(Integer weight) {
-        this.weight = weight;
-    }
-
-    public Integer getReps() {
-        return reps;
-    }
-
-    public void setReps(Integer reps) {
-        this.reps = reps;
-    }
-
     public TrainingSession getTrainingSession() {
         return trainingSession;
     }
@@ -82,4 +69,25 @@ public class Exercise {
     public void setTrainingSession(TrainingSession trainingSession) {
         this.trainingSession = trainingSession;
     }
+
+    public List<Set> getSets() {
+        return sets;
+    }
+
+    public void setSets(List<Set> sets) {
+        this.sets = sets;
+    }
+
+    // Hilfsmethode zum Hinzufügen eines Sets
+    public void addSet(Set set) {
+        sets.add(set);
+        set.setExercise(this);
+    }
+
+    // Hilfsmethode zum Entfernen eines Sets
+    public void removeSet(Set set) {
+        sets.remove(set);
+        set.setExercise(null);
+    }
 }
+
